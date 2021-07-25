@@ -1,6 +1,13 @@
 {
   "dependencies": {
+<<<<<<< Updated upstream
     "@docker/sdk": "^1.0.3",
     "anycloud": "^0.1.41"
+=======
+    "@docker/sdk": "^1.0.3"
+  },
+  "devDependencies": {
+    "foy": "^0.2.8"
+>>>>>>> Stashed changes
   }
 }
