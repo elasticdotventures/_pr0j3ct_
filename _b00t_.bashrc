@@ -876,14 +876,16 @@ function debInst() {
     dpkg-query -Wf'${db:Status-abbrev}' "$1" 2>/dev/null | grep -q '^i'
 }
 
-if debInst "moreutils" ; then
-    # only show moreutils once. 
-    if [ $( crudini_get "b00t" "has.moreutils" ) -eq "0" ] ; then 
+HAS_MOREUTILS=$( debInst "moreutils" | wc -l )
+if [ "$HAS_MOREUTILS" -gt "0" ]; then
+    # only show moreutils success once. 
+    HAS_MOREUTILS=$( crudini_get "b00t" "has.moreutils" )
+    if [ "$HAS_MOREUTILS" -eq "0" ] ; then 
         log_📢_记录 "👍 debian moreutils is installed!"
         crudini_set "b00t" "has.moreutils" $(yyyymmdd)
     fi 
 else
-    log_📢_记录  "😲 install moreutils (required)"
+    log_📢_记录  "😲 missed moreutils (#ohno)"
     $SUDO_CMD apt-get install -y moreutils
 fi
 
