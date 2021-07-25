@@ -27,10 +27,18 @@ set -a
 ## 小路 \\
 ## Xiǎolù :: Path or Directory
 # THINGS YOU CAN EDIT: 
+# The normal deploy place: 
 _B00T_C0DE_Path="/c0de/_b00t_"
+
 if [ -d "$HOME/_b00t_" ] ; then 
     _B00T_C0DE_Path="$HOME/_b00t_"
+    # ~/_b00t_
+fi
+if [ -d "$HOME/._b00t_" ] ; then 
+    # ~/._b00t_  (stealth mode is preferred)
+    _B00T_C0DE_Path="$HOME/._b00t_"
 fi 
+
 export _B00T_C0DE_Path
 export _B00T_C0NFIG_Path="$HOME/.b00t"
 _b00t_INSPIRATION_FILE="$_B00T_C0DE_Path/./r3src_资源/inspiration.json"
@@ -62,20 +70,21 @@ function reb00t() {
 
 
 ## * * * * * \\
-## pathAdd 
+## pathAdd "/the/path/to/add"
 unset pathAdd
 function pathAdd() {
     if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
         PATH="${PATH:+"$PATH:"}$1"
     fi
 }
-# webi tools
+
+# mostly for webinstall compat. 
 pathAdd "$HOME/.local/bin"
 pathAdd "$HOME/.yarn/bin"
 ## * * * * * //
 
 if [ "/usr/bin/docker" ] ; then 
-    echo "🐳 has d0cker! loading docker extensions"
+    echo "🐳 d0cker:yes! ... try:"
     source "$_B00T_C0DE_Path/docker.🐳/_bashrc.sh"
 
     ## 😔 docker context? 
@@ -83,7 +92,6 @@ if [ "/usr/bin/docker" ] ; then
     # export DOCKER_CONTEXT=default
     # log_📢_记录 "🐳 CONTEXT: $DOCKER_CONTEXT"  
     # docker context ls
-
 fi
 
 ## * * * * * \\
@@ -211,12 +219,16 @@ alias myp='ps -fjH -u $USER'
 # FUTURE: 
 # https://github.com/GochoMugo/msu
 
-# TODO: test for pipx
-eval "$(register-python-argcomplete pipx)"
+# TODO: test for pipx 🐍
+HAS_PIPX=$( whereis -b pipx | wc -m )
+if [ $HAS_PIPX -gt 6 ] ; then 
+    # ^^^ "6" is arbitrary string length of pipx result. 
+    eval "$(register-python-argcomplete pipx)"
+fi 
 # pipx run
 
-# bat - a pretty replacement for cat.
-alias bat="batcat"
+# bat - a (better) pretty replacement for /bin/cat
+alias bat="batcat" 
 
 # bats - bash testing system (in a docker container)
 # 🦨 need consent before running docker
@@ -247,7 +259,7 @@ alias gitstatus='git -C . status --porcelain | grep "^.\w"'
 alias ve='python3 -m venv ./venv'
 alias va='source ./venv/bin/activate'
 
-# use fzf to find a file and open it in vs code
+# "c" browses code, use fzf to find a file and open it in vs code
 alias c='code $(fzf --height 40% --reverse)'
 
 # fd is same-same like unix find, but alt-featureset
@@ -258,21 +270,20 @@ fi
 
 # handy for generating dumps, etc..
 # $ script.sh >> foobar.`ymd`
+
 alias yyyymmdd="date +'%Y%m%d'"
 alias ymd="date +'%Y%m%d'"
 alias ymd_hm="date +'%Y%m%d.%H%M'"
 alias ymd_hms="date +'%Y%m%d.%H%M%S'"
 ##################
-
-
-
+# sideffect: we don't want to enable
+# so we can't use the aliase till later. 
+# shopt -s expand_aliases
 
 # order of magnitude
 #function oom () {
 #    # todo: detect an order of magnitude transition. 
 #}
-
-
 
 
 
@@ -328,6 +339,7 @@ function _b00t_init_🥾_开始() {
 }
 export -f _b00t_init_🥾_开始
 #_b00t_init_🥾_开始
+
 
 ## 进口 //
 
@@ -598,6 +610,8 @@ function is_n0t_aliased() {
 ##
 ## A pretty introduction to the system. 
 ##
+## the future role of motd is to capture local state of any install. 
+## 
 function motd() {
     # count motd's
     # 🍰 https://unix.stackexchange.com/questions/485221/read-lines-into-array-one-element-per-line-using-bash
