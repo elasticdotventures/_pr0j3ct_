@@ -8,25 +8,27 @@ source "$_B00T_C0DE_Path/_b00t_.bashrc"
 ## * * * *\\
 
 # Pip requires: 
-$SUDO_CMD apt install -y build-essential libssl-dev libffi-dev python3-dev python-pip
+$SUDO_CMD apt install -y build-essential libssl-dev libffi-dev python3-dev python-pip pipx
 
 # Python init. 
 
 $SUDO_CMD apt install -y python3-pip
 $SUDO_CMD apt install -y python3-venv
 
+## PipX - must be installed before virtual env
+## Install and Run Python Applications in Isolated Environments
+## https://github.com/pypa/pipx
+$SUDO_CMD python3 -m pip install --user pipx
+$SUDO_CMD python3 -m pipx ensurepath
+
+# pipx completions
+## we will install/uninstall _b00t_ packages via pipx
+# pipx install 
+
 # Establish virtual environemnt
 python3 -m venv .venv
 source .venv/bin/activate
 
-## PipX 
-## Install and Run Python Applications in Isolated Environments
-## https://github.com/pypa/pipx
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
-pipx completions
-## we will install/uninstall _b00t_ packages via pipx
-pipx install 
 
 # Package Management
 ## Poetry

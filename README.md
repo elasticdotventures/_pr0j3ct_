@@ -1,7 +1,23 @@
 
-# \__b00t__
+# \__b00t__ usage
+
+ALPHA quality, requires Ubuntu 20.04 (wsl2 compatible)
+to install all packages:
+
+```bash
+cd ~
+git clone https://github.com/elasticdotventures/_b00t_.git
+cd _b00t_ 
+./01-setup.sh
+
+# to run on login:
+echo "~/_b00t_/_b00t_.bashrc" >> ~/.bashrc
+```
+
+
+# \__b00t__ about
 ------
-b00t is my "ultimate" framework-tooling for deploying a distributed-ai, polylingual voice-cli "format transformer" that can learn to perform a plurality of skills including design/control of robotics and learning to play video games, design and print 3d objects, manipulate video, write and deploy code to create "smart pipes" or "smart bridges" across or within one or more clouds.  
+b00t is my "ultimate" framework-tooling for deploying a distributed-ai, polylingual voice-cli "format transformer" that can learn to perform a plurality of skills including design/control of robotics, ai-learning (video games, etc.), design and print 3d objects, manipulate video, write and deploy code to create "smart pipes" or "smart bridges" across or within one or more clouds.  
 
 Presently this is only a compendium of time saving tools offering an interactive initalization (using fzf), menu system for the 
 smart pipes and installation scripts for the rest.  The plan is to have a Yahoo-esque "Awesome" curated list of installable 

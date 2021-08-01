@@ -17,7 +17,6 @@ if n0ta_xfile_📁_好不好 "/bin/sudo" "/usr/bin/sudo" ; then
     log_📢_记录 "🐧😇 sudo"
     $SUDO_CMD apt-get install -y sudo
 fi
-apt-get install -y sudo
 
 # todo: setup io_streams, ebpf intercepts. 
 

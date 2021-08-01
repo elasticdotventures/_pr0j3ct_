@@ -6,8 +6,28 @@
 #* 进口v2 🥾 ALWAYS load c0re Libraries!
 source "$_B00T_C0DE_Path/_b00t_.bashrc"
 
+#
+
+curl -sL https://deb.nodesource.com/setup_14.x | $SUDO_CMD -E bash -
+$SUDO_CMD apt-get install -y nodejs
+
+## Run `sudo apt-get install -y nodejs` to install Node.js 14.x and npm
+
+## To install the Yarn package manager, run:
+curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list     sudo apt-get update && sudo apt-get install yarn
+pathAdd "$HOME/.yarn/bin"
+
+# not even sure we need NPM. 
+# npm install -g npm@latest
+
+
 # once we setup npm
 # 🤓 ZX: a tool for writing better scripts. 
+# Bash is great, but when it comes to writing scripts, people usually choose a more convenient programming language. 
+# JavaScript is a perfect choice, but standard Node.js library requires additional hassle before using. 
+# The zx package provides useful wrappers around child_process, escapes arguments and gives sensible defaults.
+
 # https://github.com/google/zx
 #
 # BASH: 
@@ -21,24 +41,9 @@ source "$_B00T_C0DE_Path/_b00t_.bashrc"
 #     $`sleep 2; echo 2`,
 #     $`sleep 3; echo 3`,
 #   ])
-#
 
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+$SUDO_CMD npm i -g zx
 
-## Run `sudo apt-get install -y nodejs` to install Node.js 14.x and npm
-
-## To install the Yarn package manager, run:
-     curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
-     echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list     sudo apt-get update && sudo apt-get install yarn
-pathAdd "$HOME/.yarn/bin"
-
-# not even sure we need NPM. 
-# npm install -g npm@latest
-
-
-let name = 'foo bar'
-await $`mkdir /tmp/${name}`
-npm i -g zx
 # curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 # https://linuxize.com/post/how-to-install-node-js-on-ubuntu-20-04/#installing-nodejs-and-npm-from-nodesource
 
