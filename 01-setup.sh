@@ -15,6 +15,13 @@
 #echo
 # ------------- CALLED ------------- #
 
+
+## trying to get this setup with user permission
+if [[ $EUID -eq 0 ]]; then
+   echo "This 01-setup.sh must be run without sudo" 
+   exit 1
+fi
+
 #* 进口v2 🥾 ALWAYS load c0re Libraries!
 source "./_b00t_.bashrc"
 
@@ -56,25 +63,44 @@ source "./_b00t_.bashrc"
 # 
 # - canonical "main" is free/open-source
 # - universe is community maintained, free/open
-sudo add-apt-repository universe
-# - multiverse is restricted by copyright or legal issues
-# sudo add-apt-repository multiverse
-# - restricted is proprietary device drivers. 
-# sudo add-apt-repository restricted
+function n33ds_apt_repo() {
+  # note: bash returns exit 0 (success), on 
+  local REPO=$1
+  if [ $(apt-cache policy | grep http | awk '{print $2 $3}' | sort -u | grep -c "$REPO") -eq 0  ] ; then
+    # success, exit 0 is 
+    return 0
+  else
+    # exit 1,  is not required. 
+    return 1
+  fi
+}
+
+if n33ds_apt_repo "universe" ; then 
+  sudo add-apt-repository universe
+  sudo apt update -y
+  # - multiverse is restricted by copyright or legal issues
+  # sudo add-apt-repository multiverse
+  # - restricted is proprietary device drivers. 
+  # sudo add-apt-repository restricted
+fi
+
+
+if [ ! -x "/usr/bin/fdfind" ] ; then
+  # 🐣 -- doh! we need fdfind .. 
+  ## 进口 (Jìnkǒu :: Import/Load PHASE 1 * \\ 
+  # _b00t_ Bin shell & helpers, logging. 
+  # bash_source_加载 "$_B00T_C0DE_Path/./bash.🔨/init.10*.🥾.*.sh"
+  log_📢_记录 "installing fd-find"
+  sudo apt install -y fd-find
+  # bash_source_加载 "bash.🔨/init.10级.🥾.b00t.sh"
+fi 
 
 
 ## list all init-files (excluding template) in the bash bash.🔨/
-for bashrc in `/usr/bin/fdfind --type x --glob "init*.sh"  $_B00T_C0DE_Path/bash.🔨/ | sort` ; 
-  do  
+for bashrc in `/usr/bin/fdfind --type x --glob "init*.sh"  $_B00T_C0DE_Path/bash.🔨/ | sort` ; do  
   echo $bashrc ; 
   bash_source_加载 $bashrc
 done
-
-
-## 进口 (Jìnkǒu :: Import/Load PHASE 1 * \\ 
-# _b00t_ Bin shell & helpers, logging. 
-# bash_source_加载 "$_B00T_C0DE_Path/./bash.🔨/init.10*.🥾.*.sh"
-
 
 ## 进口 (Jìnkǒu :: Import/Load) PHASE 2 * * \\ 
 # Two is Torvalds Tech (Linux & Git)

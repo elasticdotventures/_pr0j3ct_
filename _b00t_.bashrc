@@ -83,7 +83,7 @@ pathAdd "$HOME/.local/bin"
 pathAdd "$HOME/.yarn/bin"
 ## * * * * * //
 
-if [ "/usr/bin/docker" ] ; then 
+if [ -x "/usr/bin/docker" ] ; then 
     echo "🐳 d0cker:yes! ... try:"
     source "$_B00T_C0DE_Path/docker.🐳/_bashrc.sh"
 
@@ -92,6 +92,8 @@ if [ "/usr/bin/docker" ] ; then
     # export DOCKER_CONTEXT=default
     # log_📢_记录 "🐳 CONTEXT: $DOCKER_CONTEXT"  
     # docker context ls
+else 
+    echo "🐳😔 d0cker:no!"    
 fi
 
 ## * * * * * \\
@@ -228,7 +230,9 @@ fi
 # pipx run
 
 # bat - a (better) pretty replacement for /bin/cat
-alias bat="batcat" 
+if [ -x "/usr/bin/batcat" ] ; then 
+    alias bat="/usr/bin/batcat" 
+fi
 
 # bats - bash testing system (in a docker container)
 # 🦨 need consent before running docker
@@ -271,7 +275,28 @@ fi
 # handy for generating dumps, etc..
 # $ script.sh >> foobar.`ymd`
 
-alias yyyymmdd="date +'%Y%m%d'"
+#function uberralias() {
+#    # 🍰 do the yyyymmdd() trick below for all date aliases from a yq file
+#    args=("$@")
+#    execCMD=${args[0]}
+#    runCMD=${args[@]:1}
+#    
+#    echo "define"
+#    function "$execCMD" () {
+#        $runCMD
+#    }
+#    # eval export -f $execCMD
+#
+#    echo "exec:$execCMD   run:$runCMD"
+#}
+
+
+function yyyymmdd() {
+    echo $( date +'%Y%m%d' )
+}
+export -f yyyymmdd
+#alias yyyymmdd=$( yyyymmdd )
+
 alias ymd="date +'%Y%m%d'"
 alias ymd_hm="date +'%Y%m%d.%H%M'"
 alias ymd_hms="date +'%Y%m%d.%H%M%S'"
@@ -464,12 +489,12 @@ function n0ta_xfile_📁_好不好() {
         log_📢_记录 "👽:不支持 $xfile is not executable. 👽:非常要!"
         return 0
     else
-
+        # log that we have the file in our crudini config
         if ! has_fn_✅_存在 "crudini_get" ; then 
             :   # crudini_get doesn't exist.
         elif [[ $( crudini_get "b00t" "has.$xfile" ) = "" ]] ; then 
             log_📢_记录 "👍 $xfile"
-            crudini_set "b00t" "has.$xfile" $( yyyymmdd )
+            crudini_set "b00t" "has.$xfile" $( echo "$YMD+0" )
         fi
         return 1
     fi
@@ -596,6 +621,7 @@ function rand0() {
 function is_n0t_aliased() {
     local args=("$@")
     local hasAlias=${args[0]}
+    echo "hasAlias: $hasAlias"
     local exists=$(alias -p | grep "alias $hasAlias=")
     # echo "exists: $exists"
     if [ -z "$exists" ] ; then
@@ -605,6 +631,77 @@ function is_n0t_aliased() {
         return 1;  #  "false", unix error
     fi
 }
+
+
+##
+## there's time we need to know reliably if we can run SUDO
+##
+function has_sudo() {
+    SUDO_CMD="/usr/bin/sudo"
+
+    ## 🦨 TODO: ask for consent to run sudo? 
+
+    if [ "$EUID" -eq 0 ] ; then
+        # r00t doesn't require sudo 
+        # https://stackoverflow.com/questions/18215973/how-to-check-if-running-as-root-in-a-bash-script
+        log_📢_记录 "👹 please don't _b00t_ as r00t"
+        SUDO_CMD=""
+    elif [ -f "./dockerenv" ] ; then
+        # https://stackoverflow.com/questions/23513045/how-to-check-if-a-process-is-running-inside-docker-container#:~:text=To%20check%20inside%20a%20Docker,%2Fproc%2F1%2Fcgroup%20.
+        log_📢_记录 "🐳😁 has_sudo found DOCKER"  
+    elif is_n0t_aliased crudini_get ; then 
+        log_📢_记录 "👻 has_sudo found no crudini_get function"  
+    elif [ -f "$SUDO_CMD" ] ; then 
+        if [[ -z $( crudini_get "b00t" "has.sudo" )  ]] ; then 
+            log_📢_记录 "🥳 found sudo"  
+            crudini_set "b00t" "has.sudo" `ymd_hms`
+        fi 
+    else 
+        log_📢_记录 "🐭 missed SUDO, try running _b00t_ inside docker."
+        SUDO_CMD=""
+    fi
+    export SUDO_CMD
+}
+has_sudo 
+
+
+## NOTE: sponge is used extensively! 
+
+###############################################################################
+# "moreutils" is a package of utilities left out of the unix books. 
+# So far, it includes the following utilities:
+#  - chronic: runs a command quietly unless it fails
+#  - combine: combine the lines in two files using boolean operations
+#  - errno: look up errno names and descriptions
+#  - ifdata: get network interface info without parsing ifconfig output
+#  - ifne: run a program if the standard input is not empty
+#  - isutf8: check if a file or standard input is utf-8
+#  - lckdo: execute a program with a lock held
+#  - mispipe: pipe two commands, returning the exit status of the first
+#  - parallel: run multiple jobs at once
+#  - pee: tee standard input to pipes
+#  - sponge: soak up standard input and write to a file
+#  - ts: timestamp standard input
+#  - vidir: edit a directory in your text editor
+#  - vipe: insert a text editor into a pipe
+#  - zrun: automatically uncompress arguments to command
+
+HAS_MOREUTILS=$( dpkg -s moreutils | wc -l )
+if [ "$HAS_MOREUTILS" -gt "0" ] ; then
+    # only show moreutils success once. 
+    log_📢_记录 "🐧👍 debian moreutils package is installed!"
+    # dpkg -s moreutils
+else
+    log_📢_记录  "😡😲 missed moreutils (#ohno)"
+    $SUDO_CMD apt-get update -y
+    $SUDO_CMD apt-get install -y moreutils
+    dpkg -s moreutils
+fi
+
+
+
+
+
 
 
 ##
@@ -630,7 +727,10 @@ function motd() {
     local motdzQ=$( rand0 ${#motdz[@]} )
     # declare -p motdz
 
-    local showWithCMD="/usr/bin/batcat"
+    local showWithCMD="/bin/cat"
+    if [ "$(type -t bat)" = 'alias' ]; then
+        showWithCMD="/usr/bin/batcat"
+    fi 
     
     f=${motdz[motdzQ]}
     local motdWidth=$(awk 'length > max_length { max_length = length; longest_line = $0 } END { print max_length }' $f)
@@ -648,6 +748,9 @@ function motd() {
         showWithCMD=""
     elif [ $motdWidth -gt $(echo $myWidth - 13 | bc) ] ; then
         # bat needs +13 columns
+        showWithCMD="cat"
+    elif is_n0t_aliased bat ; then
+        log_📢_记录 "🤓🖥️👻 no bat alias (using cat)"
         showWithCMD="cat"
     else
         # *auto*, full, plain, changes, header, grid, numbers, snip.
@@ -681,7 +784,7 @@ function motd() {
     #fi 
 
     if [ -n "$showWithCMD" ] ; then
-        motdTmpFile=$( mktemp "_b00t_.日$(ymd).一时XXXXXXXXXX.motd" )
+        motdTmpFile=$( mktemp "_b00t_.日$(yyyymmdd).一时XXXXXXXXXX.motd" )
         # echo "motdFile: $motdTmpFile"
         # echo $(rand0 10)
         ## glitch effects 
@@ -712,13 +815,24 @@ function motd() {
     log_📢_记录 "🥾📈 motd project stats, cleanup, tasks goes here. "
 
 
-    if [ -d "./.git" ] ; then 
+    #if [ "$(type -t sponge)" = 'alias' ] ; then 
+    if [ 1 == 1 ] ; then 
+        # skip github client.
+        log_📢_记录 "🥾🐙😔 skip gh client (TODO: sponge test)"
+    elif [ -d "./.git" ] ; then 
         log_📢_记录 "🥾🐙😁 found .git repo"
         # github client 
-        gh issue list
+        local NEED_AUTH_GITHUB_GH=$( gh auth status  2>&1 | sponge | grep -c "not logged into" )
+        if [ $NEED_AUTH_GITHUB_GH -gt "0" ] ; then 
+            log_📢_记录 "🥾🐙🙏 please run \"gh auth\" for github stats."
+            # TODO: ask for consent, run it! 
+        else 
+            gh issue list
+        fi 
 
         local skunk_x=$(git grep "🦨" | wc -l)
-        log_📢_记录 "🦨: $skunk_x"
+        local cake_x=$(git grep "🍰" | wc -l)
+        log_📢_记录 "🦨: $skunk_x   🍰: $cake_x"
     else 
         log_📢_记录 "🥾🐙😔 no .git dir "`pwd`
     fi 
@@ -732,6 +846,8 @@ elif ! is_n0t_aliased fd ; then
 else 
     motd
 fi
+
+
 
 
 
@@ -825,43 +941,13 @@ if [ -f $CRUDINI_CFGFILE ] ; then
     log_📢_记录 "🐭🥾 CRUDINI _seq: #$x $CRUDINI_CFGFILE"
     return 0
 else 
-    log_📢_记录 "🐭🍒 CRUDINI br0ked. file: $CRUDINI_CFGFILE"
+    log_📢_记录 "🐭🍒 CRUDINI br0ked according to crudini_ok - file: $CRUDINI_CFGFILE"
     # todo: maybe some failsafe, i.e. redis or something. 
+    sudo apt install crudini
     return 1
 fi
 }
 crudini_ok
-
-
-##
-## there's time we need to know reliably if we can run SUDO
-##
-function has_sudo() {
-    SUDO_CMD="/usr/bin/sudo"
-
-    ## 🦨 TODO: ask for consent to run sudo? 
-
-    if [ "$EUID" -eq 0 ] ; then
-        # r00t doesn't require sudo 
-        # https://stackoverflow.com/questions/18215973/how-to-check-if-running-as-root-in-a-bash-script
-        log_📢_记录 "👹 please don't b00t as r00t"
-        SUDO_CMD=""
-    elif [ -f "./dockerenv" ] ; then
-        # https://stackoverflow.com/questions/23513045/how-to-check-if-a-process-is-running-inside-docker-container#:~:text=To%20check%20inside%20a%20Docker,%2Fproc%2F1%2Fcgroup%20.
-        log_📢_记录 "🐳😁 found DOCKER"  
-    elif [ -f "$SUDO_CMD" ] ; then 
-        if [[ -z $( crudini_get "b00t" "has.sudo" )  ]] ; then 
-            log_📢_记录 "🥳 found sudo"  
-            crudini_set "b00t" "has.sudo" `ymd_hms`
-        fi 
-    else 
-        log_📢_记录 "🐭 missed SUDO, try running _b00t_ inside docker."
-        SUDO_CMD=""
-    fi
-    export SUDO_CMD
-}
-has_sudo 
-
 
 
 #############################
@@ -876,18 +962,6 @@ function debInst() {
     dpkg-query -Wf'${db:Status-abbrev}' "$1" 2>/dev/null | grep -q '^i'
 }
 
-HAS_MOREUTILS=$( debInst "moreutils" | wc -l )
-if [ "$HAS_MOREUTILS" -gt "0" ]; then
-    # only show moreutils success once. 
-    HAS_MOREUTILS=$( crudini_get "b00t" "has.moreutils" )
-    if [ "$HAS_MOREUTILS" -eq "0" ] ; then 
-        log_📢_记录 "👍 debian moreutils is installed!"
-        crudini_set "b00t" "has.moreutils" $(yyyymmdd)
-    fi 
-else
-    log_📢_记录  "😲 missed moreutils (#ohno)"
-    $SUDO_CMD apt-get install -y moreutils
-fi
 
 
 

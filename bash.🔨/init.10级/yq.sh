@@ -15,11 +15,12 @@ if n0ta_xfile_📁_好不好 "$YQ4_INSTALL_PATH" ; then
 else 
     # check yq version 
     log_📢_记录 "🧐 checking yq4"
-    currentYQver="$(yq4 -V | cut -f 2 -d ' ')"
+    currentYQver="$(yq4 -V | sed 's/[^0-9\.]//g')" # note: yq v2*3 have different version string than yq4
     isYQokay=$(is_v3rs10n_大于 "$YQ4_MIN_VERSION" $currentYQver)
-    if [ ! "$isYQokay" = false ] ; then
+    log_📢_记录 "🧐 isYQokay:$isYQokay"
+    if [ "$isYQokay" = false ] ; then
         # TODO: consent
-        log_📢_记录 "👻👼 insufficient yq --version $1, f1x1ng."
+        log_📢_记录 "👻👼 insufficient yq --version $currentYQver, f1x1ng."
         installYQ=true
         # $SUDO_CMD snap remove yq
         # $SUDO_CMD apt-get remove yq

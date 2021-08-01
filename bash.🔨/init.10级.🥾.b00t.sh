@@ -22,7 +22,7 @@ source "$_B00T_C0DE_Path/_b00t_.bashrc"
 # moved to _b00t_.bashrc
 # source "$_B00T_C0DE_Path/./bash.🔨/.bash_aliases"
 
-
+# TODO: need to do more multiplaform. 
 function checkOS() {
     export ARCH6="$(uname -m | cut -b 1-6)" # 6 relevant characters, lolz. x86_64
     IS_supported=`cat /etc/os-release | grep "Ubuntu 20.04.2 LTS"`
@@ -31,12 +31,13 @@ function checkOS() {
         log_📢_记录 "👽不支持  OS not yet supported." && exit 0
         return 1
     else
-        log_📢_记录 "👍 OS is supported"
+        log_📢_记录 "👍 OS is supported $ARCH6"
     fi
 
     return 0 
 }
 checkOS_result="$(checkOS)"
+export -f checkOS
 #echo "checkOS_result: $checkOS_result"
 
 
@@ -84,14 +85,14 @@ function mkdir_命令() {
 ## 命令 // 
 
 
-if n0ta_xfile_📁_好不好 "~/.local/bin/webi"  ; then
+if n0ta_xfile_📁_好不好 $( expandPath "~/.local/bin/webi" ) ; then
     log_📢_记录 "🥾🕸️ install webi the web installer - (http://webinstall.dev)"
     curl -sS https://webinstall.dev/webi | bash
-    export PATH="/home/w1ndy/.local/bin:$PATH"
+    export PATH="~/.local/bin:$PATH"
 fi
 
 # webi offers an alternative (but not cross platform i think)
-if n0ta_xfile_📁_好不好 "~/.local/bin/dotenv" ; then
+if n0ta_xfile_📁_好不好 $( expandPath "~/.local/bin/dotenv" ) ; then
     # TODO: wtf - not https://github.com/bashup/dotenv? 
     # TODO: chezmoi - https://github.com/twpayne/chezmoi
     log_📢_记录 "🕸️.webi dotenv $cmd"
@@ -116,17 +117,7 @@ if  [ ! -x "/bin/sed" ] || \
 fi
 
 
-if n0ta_xfile_📁_好不好 "~/.local/bin/fd"  ; then
-    ## some other applications we'll need
-    # 🤓 https://github.com/sharkdp/fd#installation
-    #$SUDO_CMD apt-get install -y fd-find
-    log_📢_记录 "😇.install fd-find helper (fd)"
-    webi fd@stable
 
-    #$SUDO_CMD mkdir -p ~/.local/bin
-    #$SUDO_CMD ln -s $(which -b fdfind) ~/.local/bin/fd
-    #alias fd="/usr/bin/fdfind"
-fi
 
 if n0ta_xfile_📁_好不好 "/usr/bin/rg" ; then
     # RipGrep, needs something higher than v10 included with ubuntu
@@ -134,8 +125,8 @@ if n0ta_xfile_📁_好不好 "/usr/bin/rg" ; then
     pwdwas=`pwd`
     tmpdir=$(mktemp -d)
     cd $tmpdir
-    log_📢_记录 "😇.install ripgrep (rg) $ARCH"
-    case "$ARCH" in
+    log_📢_记录 "😇.install ripgrep (rg) $ARCH6"
+    case "$ARCH6" in
         "x86_64")
             curl -LO https://github.com/BurntSushi/ripgrep/releases/download/12.1.1/ripgrep_12.1.1_amd64.deb
             $SUDO_CMD dpkg -i "$tmpdir/ripgrep_12.1.1_amd64.deb"
@@ -146,15 +137,17 @@ if n0ta_xfile_📁_好不好 "/usr/bin/rg" ; then
             $SUDO_CMD cp -v ripgrep-12.1.1-arm-unknown-linux-gnueabihf/rg /usr/local/bin/rg
             ;;
         *)
-            log_📢_记录 "😇👽.ripgrep $ARCH is unsupported!"
+            log_📢_记录 "😇👽.ripgrep $ARCH6 is unsupported!"
             ;;
     esac
     cd $pwdwas
     #OR .. sudo apt-get install ripgrep
 fi
 
-source ./init.10级/batcat.sh
-source ./init.10级/yq.sh
+
+# bash_source_加载 
+bash_source_加载  "./bash.🔨/./init.10级/batcat.sh"
+bash_source_加载  "./bash.🔨/./init.10级/yq.sh"
 
 
 
@@ -179,4 +172,16 @@ if [ -z "$PATHMAN_EXISTS " ] ; then
 fi
 pathman add ~/.local/bin
 
-$SUDO_CMD apt install uni2ascii  ascii2uni
+## Package: uni2ascii
+$SUDO_CMD apt install -y uni2ascii  
+#  dpkg -s uni2ascii
+#Description: UTF-8 to 7-bit ASCII and vice versa converter
+# This package provides conversion in both directions between UTF-8 Unicode and
+# a variety of 7-bit ASCII equivalents, including HTML numeric character
+# references, various escapes and hexadecimal. Such ASCII equivalents are useful
+# when including Unicode text in program source, when debugging, and when
+# entering text into web programs that can handle the Unicode character set but
+# are not 8-bit safe.
+
+## note: iostat & netstat are not valid packages > ubuntu 16
+$SUDO_CMD apt install -y htop tcpdump iotop

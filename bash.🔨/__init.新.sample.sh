@@ -40,6 +40,8 @@ source "$_B00T_C0DE_Path/_b00t_.bashrc"
 args=("$@")
 echo $# arguments passed
 echo ${args[0]} ${args[1]} ${args[2]}
+echo ${args[@]:1} # all aruments except the first
+echo ${args[@]:2:3} # the third, fourth, fifth arguments
 
 # good for testing: 
 # Run a command for specified time using timeout:

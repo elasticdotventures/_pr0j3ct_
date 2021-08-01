@@ -11,6 +11,6 @@ source "$_B00T_C0DE_Path/_b00t_.bashrc"
 ## You may also need development tools to build native addons:
 $SUDO_CMD apt-get install gcc g++ make
 
-# optional inotify-tools
-$SUDO_CMD apt-get install inotify-tools
+# optional inotify-tools .. buggy! 
+#$SUDO_CMD apt-get install inotify-tools
 
